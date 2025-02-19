@@ -21,6 +21,7 @@ mongoose
 // load the dataabase models we want to deal with
 const { Message } = require('./models/Message')
 const { User } = require('./models/User')
+const { Biography } = require('./models/Biography')
 
 // a route to handle fetching all messages
 app.get('/messages', async (req, res) => {
@@ -57,6 +58,46 @@ app.get('/messages/:messageId', async (req, res) => {
     })
   }
 })
+
+app.get('/JinLee/getInfo', async (req, res) => {
+  try {
+    const bio = await Biography.find({})
+    if(!bio) {
+      return res.status(404).json({message: "no information found"})
+    }
+    res.set('Cache-Control', 'no-store');
+    res.json({
+      messages: bio,
+      status:"imported"
+    })
+  } catch(err) {
+    res.status(500).json({
+      message:"server error",
+      error: err,
+    })
+  }
+})
+
+app.post('/JinLee/updateInfo', async (req, res) => {
+  try{
+    const JinLee = await Biography.create({
+      name: req.body.name,
+      introduction: req.body.introduction,
+      imageUrl: req.body.imageUrl,
+    })
+    return res.json({
+      message: JinLee,
+      status: "succesfuly added",
+    })
+  } catch (err) {
+    console.error(err)
+    return res.status(400).json({
+      error: err,
+      status:"failed to save JinLee to database",
+    })
+  }
+})
+
 // a route to handle logging out users
 app.post('/messages/save', async (req, res) => {
   // try to save the message to the database
